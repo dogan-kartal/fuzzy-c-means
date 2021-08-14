@@ -8,24 +8,24 @@ import matplotlib.pyplot as plt
 import random
 import time
 
-# csv dosyasında bulunan gerçek verilerimizi okuma işlemleri
+# Read data
 data_full = pd.read_csv("Iris.csv")
 columns = list(data_full.columns)
 features = columns[0:len(columns) - 1]
 data = data_full[features]
 
-# Küme sayısını belirliyoruz (setosa, versicolor, virginica)
+# Number of categories (setosa, versicolor, virginica)
 c = 3
-# Maksimum iterasyon sayısı
+# Maximum number of iterations
 MAX_ITER = 100
-# Epsilon değeri
+
 Epsilon = 0.00000001
-# Toplam verilerin sayısı
+# Number of samples, number of rows
 n = len(data)
-# Fuzzy algoritmasında en iyi sonucu elde etmek için fuzzy parametresi değerini 2 olarak belirliyoruz
+# Fuzzy parameters (2 for best result)
 m = 2.00
 
-# Matrisi rastgele değerlerle tanımlama
+# Initialize the membership matrix with random numbers
 def initialize():
 
     U = list()
@@ -38,7 +38,7 @@ def initialize():
     return U
 
 
-# Küme merkezinin hesaplanması işlemi (her iterasyonda tekrarlanır)
+# Calculate the center (repeated in each iteration)
 def calculateCenter(U):
     U_zhuanzhi = list(zip(*U))
     V = list()
@@ -58,7 +58,7 @@ def calculateCenter(U):
     return V
 
 
-# Küme merkezleri hesaplandıktan sonra bunları kullanarak random oluşturulan matrisin güncellenmesi
+# Update the membership matrix
 def U_update(U, V):
     p = float(2 / (m - 1))
     for i in range(n):
@@ -71,9 +71,10 @@ def U_update(U, V):
     return U
 
 
-# Iterasyon işlemlerinin yapıldığı fonksiyon
-# Merkez noktaları hesaplanıp random matris güncellenir daha sonra bu güncellenen matrisin merkezi hesaplanır
-# ve tekrar güncelleme işlemi yapılır
+# Calculate the central matrix V
+# Update the membership matrix U
+# calculate the updated central matrix V_update,
+# if the distance between V_update and V is less than the threshold, stop
 def iteration(U):
     iter = 0
     while iter <= MAX_ITER:
@@ -85,12 +86,12 @@ def iteration(U):
         for i in range(c):
             for j in range(len(columns) - 1):
                 juli = (V_update[i][j] - V[i][j]) ** 2 + juli
-        if (sqrt(juli) < Epsilon):
+        if (math.sqrt(juli) < Epsilon):
             break
     return V, U
 
 
-# elde bulunan verinin hangi kümeye ait olduğunu belirleme
+# Determining which cluster the available data belong to
 def getResult(U):
     results = list()
     for i in range(n):
@@ -99,13 +100,13 @@ def getResult(U):
     return results
 
 
-# FuzzyCMeans algoritmasının yapıldığı ana fonksiyon
+# Main function
 def FCM():
     start = time.time()
     U = initialize()
     V, U = iteration(U)
     results = getResult(U)
-    print("FuzzyCMeans algoritmasının zaman maliyeti：{0} s".format(time.time() - start))
+    print("Time cost of Fuzzy C Means algorithm：{0} s".format(time.time() - start))
     return results, V, U
 
 results, V, U = FCM()
@@ -114,15 +115,14 @@ DATA = np.array(data)
 results = np.array(results)
 
 
-# Verilerin birinci ve ikinci sütunlarını belirleme
+# Plot the first and second columns of DATA as x and y axes
 xlim(4, 8)
 ylim(1, 5)
-# Çizim penceresi oluşturma
+# Draw a scatter plot
 plt.figure(1)
-# Scatter grafiği çizdirme
 plt.scatter(DATA[nonzero(results == 0), 0], DATA[nonzero(results == 0), 1], marker='o', color='r', label='0', s=30)
 plt.scatter(DATA[nonzero(results == 1), 0], DATA[nonzero(results == 1), 1], marker='+', color='b', label='1', s=30)
 plt.scatter(DATA[nonzero(results == 2), 0], DATA[nonzero(results == 2), 1], marker='*', color='g', label='2', s=30)
-# Kümelerin merkez noktalarını işaretleme
+# Marking center points of clusters
 plt.scatter(V_array[:, 0], V_array[:, 1], marker='x', color='m', s=50)
 plt.show()
